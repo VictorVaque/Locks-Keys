@@ -206,11 +206,46 @@ public class Mapa {
      *  - indica recullClau=true si el destí té una clau que encara no s'ha recollit
      */
     public List<Moviment> getAccionsPossibles() {
-        List<Moviment> res = new ArrayList<>();
-        // ===============================================
-        //@TODO: A IMPLEMENTAR !!!!!!
-        // ===============================================
-        return res;
+	    List<Moviment> res = new ArrayList<>();
+		for (int i = 0; i < agents.size(); i++) {
+		    Posicio actual = agents.get(i);
+		    for (Direccio dir: Direccio.values()) {
+		        Posicio seguent = actual.translate(dir);
+		        int cellValue = getCell(seguent);
+		        if (cellValue == PARET) {
+		            continue;
+		        }
+		        
+		        if (Character.isUpperCase(cellValue)) {
+		            if (!portaObrible((char) cellValue)) {
+		                continue;
+		            }
+		        }
+		        boolean colisio = false;
+		        for (int j = 0; j < agents.size(); j++) {
+		            if (j != i) {
+		                Posicio agent = agents.get(j);
+		                if (seguent == agent) {
+		                    colisio = true;
+		                    break;
+		                }
+		            }
+		        }
+		        if (colisio) {
+		            continue;
+		        }
+		        
+		        boolean recullClau = false;
+		        if (Character.isLowerCase(cellValue)) {
+		            char key = (char) cellValue;
+		            if (!teClau(key)) {
+		                recullClau = true;
+		            }
+		        }
+		        res.add(new Moviment(i+1, dir, recullClau));
+		    }
+		}
+		return res;
     }
 
     /** 
@@ -224,21 +259,44 @@ public class Mapa {
 
     @Override
     public boolean equals(Object o) {
-        
-        // ===============================================
-        //@TODO: A IMPLEMENTAR !!!!!!
-        // ===============================================
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Mapa other = (Mapa) o;
+
+        if (n != other.n) return false;
+        if (m != other.m) return false;
+
+        if (clausMask != other.clausMask) return false;
+
+        if (!agents.equals(other.agents)) return false;
+
+        if (java.util.Arrays.deepEquals(grid, other.grid)) {
+        } else {
+            return false;
+        }
         
         return true;
     }
 
     @Override
     public int hashCode() {
-        // ===============================================
-        //@TODO: A IMPLEMENTAR !!!!!!
-        // ===============================================
-        
-        return 0;
+        int result = 17;
+
+        // mapa
+        result = 31 * result + n;
+        result = 31 * result + m;
+
+        // claus
+        result = 31 * result + clausMask;
+
+        // agents
+        result = 31 * result + agents.hashCode();
+
+        result = 31 * result + java.util.Arrays.deepHashCode(grid);
+
+        return result;
     }
 
     @Override
