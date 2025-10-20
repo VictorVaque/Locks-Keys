@@ -206,46 +206,46 @@ public class Mapa {
      *  - indica recullClau=true si el destí té una clau que encara no s'ha recollit
      */
     public List<Moviment> getAccionsPossibles() {
-	    List<Moviment> res = new ArrayList<>();
-		for (int i = 0; i < agents.size(); i++) {
-		    Posicio actual = agents.get(i);
-		    for (Direccio dir: Direccio.values()) {
-		        Posicio seguent = actual.translate(dir);
-		        int cellValue = getCell(seguent);
-		        if (cellValue == PARET) {
-		            continue;
-		        }
-		        
-		        if (Character.isUpperCase(cellValue)) {
-		            if (!portaObrible((char) cellValue)) {
-		                continue;
-		            }
-		        }
-		        boolean colisio = false;
-		        for (int j = 0; j < agents.size(); j++) {
-		            if (j != i) {
-		                Posicio agent = agents.get(j);
-		                if (seguent == agent) {
-		                    colisio = true;
-		                    break;
-		                }
-		            }
-		        }
-		        if (colisio) {
-		            continue;
-		        }
-		        
-		        boolean recullClau = false;
-		        if (Character.isLowerCase(cellValue)) {
-		            char key = (char) cellValue;
-		            if (!teClau(key)) {
-		                recullClau = true;
-		            }
-		        }
-		        res.add(new Moviment(i+1, dir, recullClau));
-		    }
-		}
-		return res;
+	List<Moviment> res = new ArrayList<>();
+
+        // posicions dels agents
+        Set<Posicio> posicionsOcupades = new HashSet<>(agents);
+
+        for (int i = 0; i < agents.size(); i++) {
+            Posicio actual = agents.get(i);
+
+            for (Direccio dir : Direccio.values()) {
+                Posicio desti = actual.translate(dir);
+                int cellValue = getCell(desti);
+
+                if (cellValue == PARET) {
+                    continue;
+                }
+
+                if (Character.isUpperCase(cellValue)) {
+                    if (!portaObrible((char) cellValue)) {
+                        continue; 
+                    }
+                }
+
+
+                if (posicionsOcupades.contains(desti)) {
+                    continue; 
+                }
+
+                boolean recullClau = false;
+                if (Character.isLowerCase(cellValue)) {
+                    char key = (char) cellValue;
+                    if (!teClau(key)) {
+                        recullClau = true;
+                    }
+                }
+
+                res.add(new Moviment(i+1, dir, recullClau));
+            }
+        }
+
+        return res;
     }
 
     /** 

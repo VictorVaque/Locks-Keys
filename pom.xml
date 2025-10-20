@@ -4,7 +4,7 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>edu.epsev.prop</groupId>
+  <groupId>edu.epsevg.prop</groupId>
   <artifactId>ac1</artifactId>
   <version>1.0-SNAPSHOT</version>
   <properties>
@@ -35,7 +35,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
-          <mainClass>edu.epsev.prop.ac1.Main</mainClass>
+          <mainClass>edu.epsevg.prop.ac1.Main</mainClass>
         </configuration>
       </plugin>
       <plugin>
