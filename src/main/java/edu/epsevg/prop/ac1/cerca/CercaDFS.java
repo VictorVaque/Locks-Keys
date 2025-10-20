@@ -10,7 +10,7 @@ import java.util.Stack;
 
 public class CercaDFS extends Cerca {
     
-    private static final int PROFUNDITAT_MAXIMA = 32;
+    private static final int PROFUNDITAT_MAXIMA = 50;
  
     public CercaDFS(boolean usarLNT) { super(usarLNT); }
 
