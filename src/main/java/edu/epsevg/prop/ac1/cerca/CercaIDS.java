@@ -1,12 +1,12 @@
 package edu.epsevg.prop.ac1.cerca;
+
 import edu.epsevg.prop.ac1.model.*;
 import edu.epsevg.prop.ac1.resultat.ResultatCerca;
 import java.util.*;
 
-
 public class CercaIDS extends Cerca {
     
-    private static final int PROFUNDITAT_MAXIMA_GLOBAL = 40;
+    private static final int PROFUNDITAT_MAXIMA_GLOBAL = 5;
     
     public CercaIDS(boolean usarLNT) {
         super(usarLNT);
@@ -20,7 +20,7 @@ public class CercaIDS extends Cerca {
             
             Map<Mapa, Integer> visitatsProfunditat = usarLNT ? new HashMap<>() : null;
             
-            List<Moviment> resultat = dls(inicial, limitProfunditat, new ArrayList<>(), visitatsProfunditat, rc);
+            List<Moviment> resultat = dlsIterativa(inicial, limitProfunditat, visitatsProfunditat, rc);
             
             if (resultat != null) {
                 rc.setCami(resultat);
@@ -31,47 +31,54 @@ public class CercaIDS extends Cerca {
         
         rc.stopTime();
     }
-    
 
-    private List<Moviment> dls(Mapa mapa, int limit, List<Moviment> cami, Map<Mapa, Integer> visitatsProfunditat, ResultatCerca rc) {
+    private List<Moviment> dlsIterativa(Mapa inicial, int limit, Map<Mapa, Integer> visitatsProfunditat, ResultatCerca rc) {
         
-        int profunditatActual = cami.size();
+        // La pila guardará los estados a explorar.
+        Stack<Mapa> pilaEstats = new Stack<>();
+        // La pila de caminos debe estar sincronizada.
+        Stack<List<Moviment>> pilaCamins = new Stack<>();
         
-        if (mapa.esMeta()) {
-            return new ArrayList<>(cami);
-        }
-        
+        pilaEstats.push(inicial);
+        pilaCamins.add(new ArrayList<>());
 
-        if (profunditatActual >= limit) {
-            rc.incNodesTallats();
-            return null;
-        }
-        
+        while (!pilaEstats.isEmpty()) {
+            Mapa mapaActual = pilaEstats.pop();
+            List<Moviment> camiActual = pilaCamins.pop();
+            int profunditatActual = camiActual.size();
+            
+            if (mapaActual.esMeta()) {
+                return new ArrayList<>(camiActual);
+            }
 
-        if (usarLNT && visitatsProfunditat != null) {
-            Integer profunditatPrevia = visitatsProfunditat.get(mapa);
-            if (profunditatPrevia != null && profunditatPrevia <= profunditatActual) {
+            if (profunditatActual >= limit) {
                 rc.incNodesTallats();
-                return null;
+                continue;
             }
-            visitatsProfunditat.put(mapa, profunditatActual);
-        }
-        
-        rc.incNodesExplorats();
-        rc.updateMemoria(cami.size() + (usarLNT && visitatsProfunditat != null ? visitatsProfunditat.size() : 0));
-        
+            
+            if (usarLNT && visitatsProfunditat != null) {
+                Integer profunditatPrevia = visitatsProfunditat.get(mapaActual);
+                if (profunditatPrevia != null && profunditatPrevia < profunditatActual) {
+                    rc.incNodesTallats();
+                    continue;
+                }
+                visitatsProfunditat.put(mapaActual, profunditatActual);
+            }
+            
+            rc.incNodesExplorats();
+            rc.updateMemoria(pilaEstats.size() + (usarLNT && visitatsProfunditat != null ? visitatsProfunditat.size() : 0));
 
-        for (Moviment moviment : mapa.getAccionsPossibles()) {
-            Mapa seguentMapa = mapa.mou(moviment);
-            
-            cami.add(moviment);
-            List<Moviment> resultat = dls(seguentMapa, limit, cami, visitatsProfunditat, rc);
-            
-            if (resultat != null) {
-                return resultat;
+            List<Moviment> accions = mapaActual.getAccionsPossibles();
+            Collections.reverse(accions);
+            for (Moviment moviment : accions) {
+                Mapa seguentMapa = mapaActual.mou(moviment);
+                
+                List<Moviment> seguentCami = new ArrayList<>(camiActual);
+                seguentCami.add(moviment);
+
+                pilaEstats.push(seguentMapa);
+                pilaCamins.push(seguentCami);
             }
-            
-            cami.remove(cami.size() - 1);
         }
         
         return null;
