@@ -4,6 +4,9 @@ import edu.epsevg.prop.ac1.model.Posicio;
 import edu.epsevg.prop.ac1.model.Direccio;
 import java.util.*;
 
+/**
+ * Heuristica avançada: Optimización del código base con mejoras incrementales
+ */
 public class HeuristicaAvancada implements Heuristica {
     
     private boolean inicialitzat = false;
@@ -12,6 +15,9 @@ public class HeuristicaAvancada implements Heuristica {
     
     private Map<Character, Posicio> posClaus;
     private Map<Posicio, Map<Posicio, Integer>> distanciesBFS;
+    
+    // MEJORA 1: Cache del análisis de criticidad
+    private Set<Character> clausCritiques;
     
     @Override
     public int h(Mapa estat) {
@@ -27,7 +33,6 @@ public class HeuristicaAvancada implements Heuristica {
         int minDistanciaTotal = Integer.MAX_VALUE;
         boolean hiHaClauPendent = false;
         
-
         for (Map.Entry<Character, Posicio> entry : posClaus.entrySet()) {
             char clau = entry.getKey();
             
@@ -35,14 +40,12 @@ public class HeuristicaAvancada implements Heuristica {
                 hiHaClauPendent = true;
                 Posicio posClau = entry.getValue();
                 
-
                 int distAgentAClau = calcularMinimaDistanciaReal(agents, posClau);
                 
                 if (distAgentAClau == Integer.MAX_VALUE) {
                     continue;
                 }
                 
-
                 int distClauASortida = getDistanciaReal(posClau, sortida);
                 
                 if (distClauASortida == Integer.MAX_VALUE) {
@@ -51,7 +54,10 @@ public class HeuristicaAvancada implements Heuristica {
                 
                 int distanciaTotal = distAgentAClau + distClauASortida;
                 
-                distanciaTotal = aplicarBonus(estat, clau, distanciaTotal);
+                // MEJORA 2: Bonus mejorado basado en criticidad pre-calculada
+                if (clausCritiques.contains(clau)) {
+                    distanciaTotal = Math.max(1, distanciaTotal - 2);
+                }
                 
                 minDistanciaTotal = Math.min(minDistanciaTotal, distanciaTotal);
             }
@@ -72,7 +78,7 @@ public class HeuristicaAvancada implements Heuristica {
         posClaus = new HashMap<>();
         distanciesBFS = new HashMap<>();
         
-
+        // Escanear grid
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
                 Posicio p = new Posicio(i, j);
@@ -84,17 +90,68 @@ public class HeuristicaAvancada implements Heuristica {
             }
         }
         
-
+        // Pre-calcular distancias BFS
         distanciesBFS.put(sortida, bfsDesde(mapa, sortida));
         
         for (Posicio posClau : posClaus.values()) {
             distanciesBFS.put(posClau, bfsDesde(mapa, posClau));
         }
         
+        // MEJORA 3: Pre-calcular llaves críticas de forma eficiente
+        clausCritiques = identificarClausCritiques(mapa);
+        
         inicialitzat = true;
     }
     
-
+    /**
+     * MEJORA 4: Identificación eficiente de llaves críticas
+     * Una llave es crítica si su puerta bloquea el acceso directo a la salida
+     */
+    private Set<Character> identificarClausCritiques(Mapa mapa) {
+        Set<Character> critiques = new HashSet<>();
+        
+        // BFS desde salida para encontrar puertas cercanas
+        Queue<NodeBFS> queue = new LinkedList<>();
+        Set<Posicio> visitats = new HashSet<>();
+        
+        queue.add(new NodeBFS(sortida, 0));
+        visitats.add(sortida);
+        
+        while (!queue.isEmpty()) {
+            NodeBFS current = queue.poll();
+            
+            // OPTIMIZACIÓN: Solo explorar hasta distancia razonable
+            if (current.cost > Math.min(n, m)) {
+                break;
+            }
+            
+            for (Direccio dir : Direccio.values()) {
+                Posicio next = current.pos.translate(dir);
+                
+                if (visitats.contains(next)) {
+                    continue;
+                }
+                
+                int cell = mapa.getCellValue(next);
+                
+                if (cell == Mapa.PARET) {
+                    continue;
+                }
+                
+                if (Character.isUpperCase(cell)) {
+                    char clauCritica = Character.toLowerCase((char) cell);
+                    critiques.add(clauCritica);
+                    // No explorar más allá de puertas
+                } else {
+                    visitats.add(next);
+                    queue.add(new NodeBFS(next, current.cost + 1));
+                }
+            }
+        }
+        
+        return critiques;
+    }
+    
     private Map<Posicio, Integer> bfsDesde(Mapa mapa, Posicio origen) {
         Map<Posicio, Integer> distancies = new HashMap<>();
         Queue<NodeBFS> queue = new LinkedList<>();
@@ -126,7 +183,6 @@ public class HeuristicaAvancada implements Heuristica {
         return distancies;
     }
     
-
     private int calcularMinimaDistanciaReal(List<Posicio> agents, Posicio objectiu) {
         int minDist = Integer.MAX_VALUE;
         
@@ -143,7 +199,6 @@ public class HeuristicaAvancada implements Heuristica {
                 }
             }
         } else {
-            // Fallback total a Manhattan
             for (Posicio agent : agents) {
                 int dist = distanciaManhattan(agent, objectiu);
                 minDist = Math.min(minDist, dist);
@@ -153,7 +208,6 @@ public class HeuristicaAvancada implements Heuristica {
         return minDist;
     }
     
-
     private int getDistanciaReal(Posicio desde, Posicio fins) {
         Map<Posicio, Integer> distsDesde = distanciesBFS.get(desde);
         
@@ -167,34 +221,6 @@ public class HeuristicaAvancada implements Heuristica {
         return Integer.MAX_VALUE;
     }
     
-
-    private int aplicarBonus(Mapa mapa, char clau, int distanciaBase) {
-
-        char portaAssociada = Character.toUpperCase(clau);
-        
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                Posicio p = new Posicio(i, j);
-                int cell = mapa.getCellValue(p);
-                
-                if (cell == portaAssociada) {
-
-                    int distPortaSortida = distanciaManhattan(p, sortida);
-                    
-
-                    if (distPortaSortida < 5) {
-                        return Math.max(1, distanciaBase - 1);
-                    }
-                    
-                    break;
-                }
-            }
-        }
-        
-        return distanciaBase;
-    }
-    
-
     private int distanciaManhattan(Posicio a, Posicio b) {
         return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
