@@ -71,7 +71,6 @@ public class CercaDFS extends Cerca {
             }
         }
 
-        // No hi ha solució
         rc.stopTime();
     }
 }

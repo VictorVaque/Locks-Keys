@@ -34,9 +34,9 @@ public class CercaIDS extends Cerca {
 
     private List<Moviment> dlsIterativa(Mapa inicial, int limit, Map<Mapa, Integer> visitatsProfunditat, ResultatCerca rc) {
         
-        // La pila guardará los estados a explorar.
+
         Stack<Mapa> pilaEstats = new Stack<>();
-        // La pila de caminos debe estar sincronizada.
+
         Stack<List<Moviment>> pilaCamins = new Stack<>();
         
         pilaEstats.push(inicial);

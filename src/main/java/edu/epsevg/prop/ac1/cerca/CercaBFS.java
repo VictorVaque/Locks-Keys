@@ -22,14 +22,14 @@ public class CercaBFS extends Cerca {
         Set<Mapa> visited = new HashSet<>();
 
         queue.add(inicial);
-        pathQueue.add(new ArrayList<>()); // Camí buit inicial
+        pathQueue.add(new ArrayList<>()); 
         if (usarLNT) {
             visited.add(inicial);
         }
 
         
         while (!queue.isEmpty()) {
-            // node actual
+
             Mapa currentMap = queue.poll();
             List<Moviment> currentPath = pathQueue.poll();
             rc.incNodesExplorats();
@@ -39,22 +39,22 @@ public class CercaBFS extends Cerca {
             if (currentMap.esMeta()) {
                 rc.setCami(currentPath);
                 rc.stopTime();
-                return; // Solució trobada
+                return; 
             }
 
-            // nodes fills
+
             for (Moviment mov : currentMap.getAccionsPossibles()) {
                 Mapa nextMap = currentMap.mou(mov);
 
                 if (usarLNT) {
                     if (visited.contains(nextMap)) {
                         rc.incNodesTallats();
-                        continue; // Node ja visitat, l'ignorem
+                        continue; 
                     }
                     visited.add(nextMap);
                 }
 
-                // nou camí
+
                 List<Moviment> newPath = new ArrayList<>(currentPath);
                 newPath.add(mov);
 
@@ -63,7 +63,7 @@ public class CercaBFS extends Cerca {
             }
         }
 
-        // Si no hi ha solució
+
         rc.stopTime();
 
     }
