@@ -13,11 +13,11 @@
   )
 
   (:init
-    ;; Estado inicial de los agentes
+
     (at agent1 x4y3) (at agent2 x2y1)
     (occupied x4y3) (occupied x2y1)
 
-    ;; Propiedades de las ubicaciones
+
     (is-wall x0y0) (is-wall x1y0) (is-wall x2y0) (is-wall x3y0) (is-wall x4y0) (is-wall x5y0) (is-wall x6y0) (is-wall x7y0)
     (is-wall x0y1) (is-wall x6y1) (is-wall x7y1)
     (is-wall x0y2) (is-wall x5y2) (is-wall x7y2)
@@ -28,17 +28,17 @@
     (is-door x6y3 door_A)
     (is-exit x6y2)
 
-    ;; Declaración de casillas vacías
+
     (is-empty x1y1)
     (is-empty x3y1) (is-empty x4y1) (is-empty x5y1)
     (is-empty x2y2) (is-empty x3y2) (is-empty x4y2)
     (is-empty x1y3) (is-empty x2y3) (is-empty x3y3) (is-empty x5y3)
     (is-empty x5y4)
 
-    ;; Relación clave-puerta
+
     (opens key_a door_A)
 
-    ;; Conexiones de la cuadrícula
+
     (connected x1y1 x2y1) (connected x2y1 x1y1)
     (connected x2y1 x3y1) (connected x3y1 x2y1)
     (connected x3y1 x4y1) (connected x4y1 x3y1)

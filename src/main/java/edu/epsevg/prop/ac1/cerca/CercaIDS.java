@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CercaIDS extends Cerca {
     
-    private static final int PROFUNDITAT_MAXIMA_GLOBAL = 5;
+    private static final int PROFUNDITAT_MAXIMA_GLOBAL = 5; // Poso 5 perque esta 5 anys per fer el mapaD
     
     public CercaIDS(boolean usarLNT) {
         super(usarLNT);

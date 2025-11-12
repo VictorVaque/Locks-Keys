@@ -18,7 +18,7 @@ public class CercaAStar extends Cerca {
         
         PriorityQueue<NodeAStar> openSet = new PriorityQueue<>();
         Set<Mapa> closedSet = new HashSet<>();
-        Map<Mapa, Integer> millorsGCosts = new HashMap<>(); // NUEVO: trackear mejores g-costs
+        Map<Mapa, Integer> millorsGCosts = new HashMap<>();
         
         int hInicial = heur.h(inicial);
         NodeAStar nodeInicial = new NodeAStar(inicial, new ArrayList<>(), 0, hInicial);

@@ -24,7 +24,7 @@
     (solved)
   )
 
-  ;; --- ACCIÓN: Moverse a una casilla vacía ---
+
   (:action move
     :parameters (?a - agent ?from - location ?to - location)
     :precondition (and
@@ -43,7 +43,7 @@
     )
   )
 
-  ;; --- ACCIÓN: Moverse y recoger una clave ---
+
   (:action pick-key
     :parameters (?a - agent ?from - location ?to - location ?k - key)
     :precondition (and
@@ -63,7 +63,7 @@
     )
   )
 
-  ;; --- ACCIÓN: Moverse a través de una puerta ---
+
   (:action cross-door
     :parameters (?a - agent ?from - location ?to - location ?d - door ?k - key)
     :precondition (and
@@ -83,7 +83,7 @@
     )
   )
 
-  ;; --- ACCIÓN: Moverse a la salida ---
+
   (:action reach-exit
     :parameters (?a - agent ?from - location ?to - location)
     :precondition (and
